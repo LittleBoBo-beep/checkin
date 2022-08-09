@@ -3,10 +3,6 @@
   "version": "1.0.0",
   "description": "定时任务 自动签到",
   "main": "src/v2Free.js",
-  "scripts": {
-    "v2Free": "node src/v2Free.js",
-    "juejin": "node src/juejin.js"
-  },
   "keywords": [],
   "author": "",
   "license": "ISC",
