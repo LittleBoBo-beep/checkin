@@ -24,7 +24,7 @@ const v2freeData = {
 		return this.status
 	}
 }
-let [cookie, user, pass, to] = process.argv.slice(2);
+const [cookie, user, pass, to] = process.argv.slice(2);
 process.env.user = user;
 process.env.pass = pass;
 const headers = {
@@ -84,9 +84,7 @@ async function getMsgStatus({traffic = '', msg, trafficInfo: { lastUsedTraffic, 
 (async function () {
 	const repData = await checkIn()
 	try {
-		console.log('接口返回：', repData)
 		await getMsgStatus(repData);
-		console.info(v2freeData.success)
 	} catch (e) {
 		console.error(v2freeData.error)
 	}
