@@ -30,4 +30,4 @@ jobs:
           USER: ${{ secrets.USER }}
           PASS: ${{ secrets.PASS }}
           TO: ${{ secrets.TO }}
-        run: npm i && node v2Free.js "${COOKIE}" "${USER}" "${PASS}" "${TO}"
+        run: npm i && node src/v2Free.js "${COOKIE}" "${USER}" "${PASS}" "${TO}"
