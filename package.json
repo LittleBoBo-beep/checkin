@@ -6,7 +6,11 @@
   "keywords": [],
   "author": "",
   "license": "ISC",
+  "scripts": {
+    "dev": "nodemon src/juejin.js"
+  },
   "dependencies": {
+    "juejin-helper": "^1.6.1",
     "node-fetch": "^2.6.1",
     "nodemailer": "^6.6.3"
   }

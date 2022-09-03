@@ -1,8 +1,10 @@
 const fetch = require("node-fetch");
 const sendMail = require("../sendMail");
 
-const [cookie, user, pass, to] = process.argv.slice(2);
+const JueJinHelper = require("juejin-helper");
 
+
+let [cookie, user, pass, to] = process.argv.slice(2);
 process.env.user = user;
 process.env.pass = pass;
 let score = 0;
@@ -74,7 +76,7 @@ const drawFn = async () => {
   if (check_in.err_no !== 0) return Promise.reject("签到异常！");
   return Promise.resolve(`签到成功！当前积分；${check_in.data.sum_point}`);
 })()
-  .then((msg) => {
+  .then(() => {
     return fetch("https://api.juejin.cn/growth_api/v1/get_cur_point", {
       headers,
       method: "GET",
@@ -86,7 +88,10 @@ const drawFn = async () => {
     score = res.data;
     return drawFn();
   })
-  .then((msg) => {
+
+  .then(async (msg) => {
+	  const { notCollectBugList,bugfixInfo, gameInfo } = await bugFix();
+	  console.log(bugfixInfo, gameInfo)
     return sendMail({
       from: "掘金",
       to,
@@ -95,11 +100,12 @@ const drawFn = async () => {
         <h1 style="text-align: center">自动签到通知</h1>
         <p style="text-indent: 2em">签到结果：${msg}</p>
         <p style="text-indent: 2em">当前积分：${score}</p><br/>
+        <p style="text-indent: 2em">收集BUG：${notCollectBugList.length}</p><br/>
       `,
     }).catch(console.error);
   })
-  .then(() => {
-  })
+  // .then(() => {
+  // })
   .catch((err) => {
     sendMail({
       from: "掘金",
@@ -118,7 +124,7 @@ const drawFn = async () => {
  */
 //  ?aid=&uuid=
 const lucky = async () => {
-  const res = await fetch(
+  return await fetch(
     "https://api.juejin.cn/growth_api/v1/lottery_lucky/dip_lucky",
     {
       headers,
@@ -128,3 +134,56 @@ const lucky = async () => {
     }
   ).then((res) => res.json());
 };
+
+const bugFix = async function () {
+	const jueJin = new JueJinHelper();
+	await jueJin.login(cookie);
+
+	const bugfix = jueJin.bugfix();
+	// 获取未收集的bug列表
+	const notCollectBugList = await bugfix.getNotCollectBugList();
+	await bugfix.collectBugBatch(notCollectBugList);
+	console.log(`收集Bug ${notCollectBugList.length}`);
+
+	const competition = await bugfix.getCompetition();
+	const bugfixInfo = await bugfix.getUser(competition);
+	console.log(`未消除Bug数量 ${bugfixInfo.user_own_bug}`);
+	const gameInfo = await autoSeaGold(jueJin)
+	return {
+		notCollectBugList,
+		bugfixInfo,
+		gameInfo
+	}
+}
+
+
+const autoSeaGold = async function (jueJin) {
+	const seaGold = jueJin.seagold();
+
+	await seaGold.gameLogin(); // 登陆游戏
+
+	let gameInfo;
+
+	const info = await seaGold.gameInfo(); // 游戏状态
+	if (info.gameStatus === 1) {
+		gameInfo = info.gameInfo; // 继续游戏
+	} else {
+		gameInfo = await seaGold.gameStart(); // 开始游戏
+	}
+
+	const command = ["U", "L"];
+	try {
+		await seaGold.gameCommand(Number(gameInfo.gameId), command); // 执行命令
+
+	} catch (e) {
+		console.error('[error]:', e);
+	}
+	const result = await seaGold.gameOver(); // 游戏结束
+	console.log(result); // => { ... }
+
+	await jueJin.logout();
+	return result;
+}
+
+
+bugFix()
