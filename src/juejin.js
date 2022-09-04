@@ -1,8 +1,7 @@
-const fetch = require("node-fetch");
-const sendMail = require("../sendMail");
+const requestFetch = require("./utils/utils");
+const sendMail = require("./utils/sendMail");
 
 const JueJinHelper = require("juejin-helper");
-
 
 let [cookie, user, pass, to] = process.argv.slice(2);
 process.env.user = user;
@@ -21,110 +20,101 @@ const headers = {
   accept: "*/*",
   cookie,
 };
-
+const noticeMsg = {
+	point: '',
+	checkInStatus: '',
+	getLucky: '',
+	prize: '',
+	prizeState: '',
+	hasBug: '',
+	noBugFix: '',
+	seaGold: ''
+}
 // 抽奖
 const drawFn = async () => {
-  // 查询今日是否有免费抽奖机会
-  const today = await fetch(
+	/**
+	 * 查询今日是否有免费抽奖机会
+	 */
+  const today = await requestFetch(
     "https://api.juejin.cn/growth_api/v1/lottery_config/get",
     {
       headers,
       method: "GET",
       credentials: "include",
     }
-  ).then((res) => res.json());
-
-  if (today.err_no !== 0) return Promise.reject("已经签到！免费抽奖失败！");
-  if (today.data.free_count === 0)
-    return Promise.resolve("签到成功！今日已经免费抽奖！");
+  )
+  if (today.err_no !== 0) {
+	  noticeMsg.checkInStatus = '已经签到！';
+	  noticeMsg.prizeState = '免费抽奖失败！';
+	  return Promise.reject("已经签到！免费抽奖失败！");
+  }
+  if (today.data.free_count === 0) {
+	  noticeMsg.checkInStatus = '签到成功！';
+	  noticeMsg.prizeState = '今日已经免费抽奖！';
+	  return Promise.resolve("签到成功！今日已经免费抽奖！");
+  }
 
   // 免费抽奖
-  const draw = await fetch("https://api.juejin.cn/growth_api/v1/lottery/draw", {
+  const draw = await requestFetch("https://api.juejin.cn/growth_api/v1/lottery/draw", {
     headers,
     method: "POST",
     credentials: "include",
-  }).then((res) => res.json());
-  // {"err_no":0,"err_msg":"success","data":{"lottery":[{"lottery_id":"6981716980386496552","lottery_name":"随机矿石","lottery_type":1,"lottery_image":"https://p3-juejin.byteimg.com/tos-cn-i-k3u1fbpfcp/32ed6a7619934144882d841761b63d3c~tplv-k3u1fbpfcp-no-mark:0:0:0:0.image","unlock_count":0},{"lottery_id":"6981716405976743943","lottery_name":"Bug","lottery_type":2,"lottery_image":"https://p1-juejin.byteimg.com/tos-cn-i-k3u1fbpfcp/0a4ce25d48b8405cbf5444b6195928d4~tplv-k3u1fbpfcp-no-mark:0:0:0:0.image","unlock_count":0},{"lottery_id":"7090359937317994503","lottery_name":"「码赛克」掘金贴纸","lottery_type":4,"lottery_image":"https://p6-juejin.byteimg.com/tos-cn-i-k3u1fbpfcp/77d5e1e091a944b1b894029d22cdfcf0~tplv-k3u1fbpfcp-no-mark:0:0:0:0.image?","unlock_count":0},{"lottery_id":"7088615500954992644","lottery_name":"「码赛克」线圈毛巾","lottery_type":4,"lottery_image":"https://p9-juejin.byteimg.com/tos-cn-i-k3u1fbpfcp/77b634472b7f4700a4060edbd8cb3cf3~tplv-k3u1fbpfcp-no-mark:0:0:0:0.image?","unlock_count":0},{"lottery_id":"6981709286694977549","lottery_name":"Yoyo抱枕","lottery_type":3,"lottery_image":"https://p6-juejin.byteimg.com/tos-cn-i-k3u1fbpfcp/515ebe113d8d407fa5d36191257ce583~tplv-k3u1fbpfcp-no-mark:0:0:0:0.image","unlock_count":0},{"lottery_id":"7107519448088576031","lottery_name":"哔哩哔哩大会员月卡","lottery_type":4,"lottery_image":"https://p9-juejin.byteimg.com/tos-cn-i-k3u1fbpfcp/defea02506f040849e95cebf350086de~tplv-k3u1fbpfcp-no-mark:0:0:0:0.image?","unlock_count":0},{"lottery_id":"7103338281479176192","lottery_name":"Click午睡枕","lottery_type":3,"lottery_image":"https://p3-juejin.byteimg.com/tos-cn-i-k3u1fbpfcp/8f0ff284106b44aebf7281900d1707bf~tplv-k3u1fbpfcp-no-mark:0:0:0:0.image?","unlock_count":0},{"lottery_id":"7102706037760720930","lottery_name":"字节咖啡保温杯","lottery_type":3,"lottery_image":"https://p9-juejin.byteimg.com/tos-cn-i-k3u1fbpfcp/fa31d47d93ce4793a50b664a3e032b18~tplv-k3u1fbpfcp-no-mark:0:0:0:0.image?","unlock_count":0},{"lottery_id":"6981696205310918691","lottery_name":"Switch","lottery_type":3,"lottery_image":"https://p3-juejin.byteimg.com/tos-cn-i-k3u1fbpfcp/215f7217aa3a48dfa4dbb69976e92b1b~tplv-k3u1fbpfcp-no-mark:0:0:0:0.image","unlock_count":1}],"free_count":0,"point_cost":200}}
-  if (draw.err_no !== 0) return Promise.reject("已经签到！免费抽奖异常！");
-  if (draw.data.lottery_type === 1) score += 66;
+  })
+  if (draw.err_no !== 0) {
+	  noticeMsg.checkInStatus = '已经签到！';
+	  noticeMsg.prizeState = '免费抽奖异常！';
+	  return Promise.reject("已经签到！免费抽奖异常！");
+  }
+  // if (draw.data.lottery_type === 1) score += 66;
   await lucky();
+  noticeMsg.getLucky = '沾喜气成功~';
+  noticeMsg.prize = `恭喜抽到：${draw.data.lottery_name}`
   return Promise.resolve(`签到成功！恭喜抽到：${draw.data.lottery_name}`);
 };
 
-// 签到
-(async () => {
-  // 查询今日是否已经签到
-  const today_status = await fetch(
-    "https://api.juejin.cn/growth_api/v1/get_today_status",
-    {
-      headers,
-      method: "GET",
-      credentials: "include",
-    }
-  ).then((res) => res.json());
-  // {"err_no":0,"err_msg":"success","data":true}
-  if (today_status.err_no !== 0) return Promise.reject("签到失败！");
-  if (today_status.data) return Promise.resolve("今日已经签到！");
+/**
+ * 签到
+ * @return {Promise<string|*>}
+ */
+async function checkIn() {
+	// 查询今日是否已经签到
+	const today_status = await requestFetch(
+			"https://api.juejin.cn/growth_api/v1/get_today_status",
+			{
+				headers,
+				method: "GET",
+				credentials: "include",
+			}
+	)
+	// {"err_no":0,"err_msg":"success","data":true}
+	if (today_status.err_no !== 0) return Promise.reject("签到失败！");
+	if (today_status.data) return Promise.resolve("今日已经签到！");
 
-  // 签到
-  const check_in = await fetch("https://api.juejin.cn/growth_api/v1/check_in", {
-    headers,
-    method: "POST",
-    credentials: "include",
-  }).then((res) => res.json());
-  // {"err_no":0,"err_msg":"success","data":{"incr_point":100,"sum_point":27712}}
-  if (check_in.err_no !== 0) return Promise.reject("签到异常！");
-  return Promise.resolve(`签到成功！当前积分；${check_in.data.sum_point}`);
-})()
-  .then(() => {
-    return fetch("https://api.juejin.cn/growth_api/v1/get_cur_point", {
-      headers,
-      method: "GET",
-      credentials: "include",
-    }).then((res) => res.json());
-    // {"err_no":0,"err_msg":"success","data":27812}
-  })
-  .then((res) => {
-    score = res.data;
-    return drawFn();
-  })
+	// 签到
+	const check_in = await requestFetch("https://api.juejin.cn/growth_api/v1/check_in", {
+		headers,
+		method: "POST",
+		credentials: "include",
+	})
+	// {"err_no":0,"err_msg":"success","data":{"incr_point":100,"sum_point":27712}}
+	if (check_in.err_no !== 0) return Promise.reject("签到异常！");
+	return check_in
+}
 
-  .then(async (msg) => {
-	  const { notCollectBugList,bugfixInfo, gameInfo } = await bugFix();
-	  console.log(bugfixInfo, gameInfo)
-    return sendMail({
-      from: "掘金",
-      to,
-      subject: "定时任务成功",
-      html: `
-        <h1 style="text-align: center">自动签到通知</h1>
-        <p style="text-indent: 2em">签到结果：${msg}</p>
-        <p style="text-indent: 2em">当前积分：${score}</p><br/>
-        <p style="text-indent: 2em">收集BUG：${notCollectBugList.length}</p><br/>
-      `,
-    }).catch(console.error);
-  })
-  // .then(() => {
-  // })
-  .catch((err) => {
-    sendMail({
-      from: "掘金",
-      to,
-      subject: "定时任务失败",
-      html: `
-        <h1 style="text-align: center">自动签到通知</h1>
-        <p style="text-indent: 2em">执行结果：${err}</p>
-        <p style="text-indent: 2em">当前积分：${score}</p><br/>
-      `,
-    }).catch(console.error);
-  });
+function getCurPoint() {
+	return requestFetch("https://api.juejin.cn/growth_api/v1/get_cur_point", {
+		headers,
+		method: "GET",
+		credentials: "include",
+	})
+}
 
 /**
  * @desc 沾喜气
  */
 //  ?aid=&uuid=
 const lucky = async () => {
-  return await fetch(
+  return await requestFetch(
     "https://api.juejin.cn/growth_api/v1/lottery_lucky/dip_lucky",
     {
       headers,
@@ -132,9 +122,9 @@ const lucky = async () => {
       credentials: "include",
       body: JSON.stringify({ lottery_history_id: "7052109119238438925" }),
     }
-  ).then((res) => res.json());
+  )
 };
-
+// 掘金 BUGFIX
 const bugFix = async function () {
 	const jueJin = new JueJinHelper();
 	await jueJin.login(cookie);
@@ -143,20 +133,26 @@ const bugFix = async function () {
 	// 获取未收集的bug列表
 	const notCollectBugList = await bugfix.getNotCollectBugList();
 	await bugfix.collectBugBatch(notCollectBugList);
-	console.log(`收集Bug ${notCollectBugList.length}`);
 
 	const competition = await bugfix.getCompetition();
 	const bugfixInfo = await bugfix.getUser(competition);
-	console.log(`未消除Bug数量 ${bugfixInfo.user_own_bug}`);
-	const gameInfo = await autoSeaGold(jueJin)
+	let gameInfo
+	try {
+		gameInfo = await autoSeaGold(jueJin)
+	} catch (e) {
+		console.error('autoSeaGold:', e)
+		noticeMsg.seaGold = '游戏异常~';
+	}
+	noticeMsg.hasBug = `BUG的数量${notCollectBugList.length}`
+	noticeMsg.noBugFix = `未消除的BUG：${bugfixInfo.user_own_bug}`
+	console.log('gameInfo:', gameInfo)
 	return {
 		notCollectBugList,
 		bugfixInfo,
 		gameInfo
 	}
 }
-
-
+// 掘金 自动
 const autoSeaGold = async function (jueJin) {
 	const seaGold = jueJin.seagold();
 
@@ -186,4 +182,90 @@ const autoSeaGold = async function (jueJin) {
 }
 
 
-bugFix()
+
+// async function run() {
+// 	const jueJin = new JueJinHelper();
+// 	await jueJin.login(cookie);
+//
+// 	const growth = jueJin.growth();
+//
+// 	// 签到
+// 	await growth.checkIn();
+//
+// 	// 获取今日签到状态
+// 	const checkInStats = await growth.getTodayStatus();
+// 	console.log(checkInStats)
+// 	// 获取当前矿石数
+// 	// await growth.getCurrentPoint();
+//
+// 	// 获取统计签到天数
+// 	// await growth.getCounts();
+//
+//
+// 	// 获取抽奖配置
+// 	// await growth.getLotteryConfig();
+//
+// 	// 抽奖
+// 	// await growth.drawLottery();
+//
+// 	// 获取抽奖幸运用户
+// 	// await growth.getLotteriesLuckyUsers({ page_no = 1, page_size = 5 }); // => { lotteries: [{ lottery_history_id }, ...] }
+//
+// 	// 获取我的幸运值
+// 	// await growth.getMyLucky();
+//
+// 	// 沾喜气
+// 	// await growth.dipLucky(lottery_history_id); // => { has_dip, dip_value, total_value, dip_action }
+//
+// 	await jueJin.logout();
+// }
+
+
+function run() {
+	(async () => {
+		const check_in = await checkIn();
+		noticeMsg.checkInStatus = `签到成功！当前积分；${check_in.data.sum_point}`
+		return Promise.resolve(`签到成功！当前积分；${check_in.data.sum_point}`);
+	})()
+	.then(async () => {
+		// {"err_no":0,"err_msg":"success","data":27812}
+		// 查询当前矿石数量
+		const res = getCurPoint();
+		score = res.data;
+		// 抽奖
+		await drawFn();
+		// BUGFIX
+		// const { notCollectBugList,bugfixInfo, gameInfo } =
+		await bugFix();
+		// console.log(bugfixInfo, gameInfo)
+		let html = '<h1 style="text-align: center">掘金自动化通知</h1>'
+		for (const noticeMsgKey in noticeMsg) {
+			if (noticeMsg.hasOwnProperty(noticeMsgKey)) {
+				html += `<p style="text-indent: 2em">${noticeMsg[noticeMsgKey]}</p><br/>`
+			}
+		}
+        // <p style="text-indent: 2em">签到结果：${msg}</p>
+        // <p style="text-indent: 2em">当前积分：${score}</p><br/>
+        // <p style="text-indent: 2em">收集BUG：${notCollectBugList.length}</p><br/>
+        // <p style="text-indent: 2em">未消除的BUG：${bugfixInfo.user_own_bug}</p><br/>
+		return sendMail({
+			from: "掘金",
+			to,
+			subject: "定时任务成功",
+			html,
+		}).catch(console.error);
+	})
+	.catch((err) => {
+		sendMail({
+			from: "掘金",
+			to,
+			subject: "定时任务失败",
+			html: `
+        <h1 style="text-align: center">自动签到通知</h1>
+        <p style="text-indent: 2em">执行结果：${err}</p>
+        <p style="text-indent: 2em">当前积分：${score}</p><br/>
+      `,
+		}).catch(console.error);
+	});
+}
+run();

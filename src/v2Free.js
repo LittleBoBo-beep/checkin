@@ -1,5 +1,5 @@
-const fetch = require("node-fetch");
-const sendMail = require("../sendMail");
+const sendMail = require("./utils/sendMail");
+const requestFetch = require("./utils/utils");
 const v2freeData = {
 	title: 'v2free', // 标题
 	h1: '自动签到', // h1标题
@@ -39,10 +39,10 @@ const headers = {
  */
 async function checkIn() {
 	try {
-		const check_in = await fetch("https://w1.v2dns.xyz/user/checkin", {
+		const check_in = await requestFetch("https://w1.v2dns.xyz/user/checkin", {
 			headers,
 			method: "POST"
-		}).then(res => res.json());
+		})
 		/*eg: {"msg":"\u83b7\u5f97\u4e86 495MB \u6d41\u91cf.","unflowtraffic":3537895424,"traffic":"3.29GB","trafficInfo":{"todayUsedTraffic":"0B","lastUsedTraffic":"142.77MB","unUsedTraffic":"3.16GB"},"ret":1}*/
 		Object.assign(v2freeData, check_in)
 		return v2freeData
