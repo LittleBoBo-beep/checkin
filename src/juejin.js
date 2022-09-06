@@ -167,13 +167,13 @@ const autoSeaGold = async function (jueJin) {
 	}
 
 	const command = ["U", "L"];
+	let result;
 	try {
 		await seaGold.gameCommand(Number(gameInfo.gameId), command); // 执行命令
-
+		result = await seaGold.gameOver(); // 游戏结束
 	} catch (e) {
 		console.error('[error]:', e);
 	}
-	const result = await seaGold.gameOver(); // 游戏结束
 	noticeMsg.seaGold = '游戏结束';
 	console.log(result); // => { ... }
 
@@ -249,7 +249,11 @@ function run() {
 		await drawFn();
 		// BUGFIX
 		// const { notCollectBugList,bugfixInfo, gameInfo } =
-		await bugFix();
+		try {
+			await bugFix();
+		} catch (e) {
+			console.log(e)
+		}
 		// console.log(bugfixInfo, gameInfo)
 		let html = '<h1 style="text-align: center">掘金自动化通知</h1>'
 		for (const noticeMsgKey in noticeMsg) {
