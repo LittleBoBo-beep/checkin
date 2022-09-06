@@ -7,7 +7,8 @@
   "author": "",
   "license": "ISC",
   "scripts": {
-    "dev": "nodemon src/juejin.js"
+    "dev:juejin": "nodemon src/juejin.js",
+    "dev:v2Free": "nodemon src/v2Free.js"
   },
   "dependencies": {
     "juejin-helper": "^1.6.1",
