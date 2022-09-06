@@ -44,14 +44,12 @@ const drawFn = async () => {
     }
   )
   if (today.err_no !== 0) {
-	  noticeMsg.checkInStatus = '已经签到！';
 	  noticeMsg.prizeState = '免费抽奖失败！';
-	  return Promise.reject("已经签到！免费抽奖失败！");
+	  return Promise.resolve();
   }
   if (today.data.free_count === 0) {
-	  noticeMsg.checkInStatus = '签到成功！';
 	  noticeMsg.prizeState = '今日已经免费抽奖！';
-	  return Promise.resolve("签到成功！今日已经免费抽奖！");
+	  return Promise.resolve();
   }
 
   // 免费抽奖
@@ -61,24 +59,24 @@ const drawFn = async () => {
     credentials: "include",
   })
   if (draw.err_no !== 0) {
-	  noticeMsg.checkInStatus = '已经签到！';
-	  noticeMsg.prizeState = '免费抽奖异常！';
-	  return Promise.reject("已经签到！免费抽奖异常！");
+	  noticeMsg.prizeState = "免费抽奖异常！";
+	  return Promise.resolve();
   }
   // if (draw.data.lottery_type === 1) score += 66;
   await lucky();
   noticeMsg.getLucky = '沾喜气成功~';
   noticeMsg.prize = `恭喜抽到：${draw.data.lottery_name}`
-  return Promise.resolve(`签到成功！恭喜抽到：${draw.data.lottery_name}`);
+  return Promise.resolve();
 };
 
 /**
- * 签到
- * @return {Promise<string|*>}
+ * 获取签到状态
+ * @return {Promise<{"err_no":number ,"err_msg":string,"data":boolean}>}
  */
-async function checkIn() {
+function getCheckStatus() {
 	// 查询今日是否已经签到
-	const today_status = await requestFetch(
+	// {"err_no":0,"err_msg":"success","data":true}
+	return requestFetch(
 			"https://api.juejin.cn/growth_api/v1/get_today_status",
 			{
 				headers,
@@ -86,22 +84,28 @@ async function checkIn() {
 				credentials: "include",
 			}
 	)
-	// {"err_no":0,"err_msg":"success","data":true}
-	if (today_status.err_no !== 0) return Promise.reject("签到失败！");
-	if (today_status.data) return Promise.resolve("今日已经签到！");
+}
 
+/**
+ * 签到
+ * @return {Promise<{"err_no":number,"err_msg":string,"data":{"incr_point":number,"sum_point":number}}>}
+ */
+async function checkIn() {
 	// 签到
-	const check_in = await requestFetch("https://api.juejin.cn/growth_api/v1/check_in", {
+	return requestFetch("https://api.juejin.cn/growth_api/v1/check_in", {
 		headers,
 		method: "POST",
 		credentials: "include",
 	})
 	// {"err_no":0,"err_msg":"success","data":{"incr_point":100,"sum_point":27712}}
-	if (check_in.err_no !== 0) return Promise.reject("签到异常！");
-	return check_in
 }
 
+/**
+ * 获取当前矿石
+ * @return {Promise<{"err_no":number,"err_msg":string,"data": number}>}
+ */
 function getCurPoint() {
+	// {"err_no":0,"err_msg":"success","data":27812}
 	return requestFetch("https://api.juejin.cn/growth_api/v1/get_cur_point", {
 		headers,
 		method: "GET",
@@ -146,11 +150,6 @@ const bugFix = async function () {
 	noticeMsg.hasBug = `BUG的数量${notCollectBugList.length}`
 	noticeMsg.noBugFix = `未消除的BUG：${bugfixInfo.user_own_bug}`
 	console.log('gameInfo:', gameInfo)
-	return {
-		notCollectBugList,
-		bugfixInfo,
-		gameInfo
-	}
 }
 // 掘金 自动
 const autoSeaGold = async function (jueJin) {
@@ -175,6 +174,7 @@ const autoSeaGold = async function (jueJin) {
 		console.error('[error]:', e);
 	}
 	const result = await seaGold.gameOver(); // 游戏结束
+	noticeMsg.seaGold = '游戏结束';
 	console.log(result); // => { ... }
 
 	await jueJin.logout();
@@ -223,14 +223,27 @@ const autoSeaGold = async function (jueJin) {
 
 function run() {
 	(async () => {
+		const checkStatus = await getCheckStatus()
+		if (checkStatus.err_no !== 0) {
+			noticeMsg.checkInStatus = '签到失败！'
+			return Promise.resolve();
+		}
+		if (checkStatus.data) {
+			noticeMsg.checkInStatus = '今日已经签到！'
+			return Promise.resolve();
+		}
 		const check_in = await checkIn();
+		if (check_in.err_no !== 0) {
+			noticeMsg.checkInStatus = "签到异常！"
+			return Promise.resolve();
+		}
 		noticeMsg.checkInStatus = `签到成功！当前积分；${check_in.data.sum_point}`
-		return Promise.resolve(`签到成功！当前积分；${check_in.data.sum_point}`);
+		return Promise.resolve();
 	})()
 	.then(async () => {
 		// {"err_no":0,"err_msg":"success","data":27812}
 		// 查询当前矿石数量
-		const res = getCurPoint();
+		const res = await getCurPoint();
 		score = res.data;
 		// 抽奖
 		await drawFn();
@@ -240,7 +253,7 @@ function run() {
 		// console.log(bugfixInfo, gameInfo)
 		let html = '<h1 style="text-align: center">掘金自动化通知</h1>'
 		for (const noticeMsgKey in noticeMsg) {
-			if (noticeMsg.hasOwnProperty(noticeMsgKey)) {
+			if (noticeMsg.hasOwnProperty(noticeMsgKey) && noticeMsg[noticeMsgKey]) {
 				html += `<p style="text-indent: 2em">${noticeMsg[noticeMsgKey]}</p><br/>`
 			}
 		}
