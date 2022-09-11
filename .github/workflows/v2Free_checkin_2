@@ -1,0 +1,33 @@
+name: v2Free_checkin_2
+
+on:
+  schedule:
+    - cron: "30 4 * * *" # 该时间为UTC时间，比北京时间晚8个小时，每天早上5点半自动执行
+
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions/setup-node@v1
+        with:
+          node-version: 12
+      - run: npm i
+
+  send:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions/setup-node@v1
+        with:
+          node-version: 12
+          registry-url: https://npm.pkg.github.com/
+      - name: Run Project
+        env:
+          COOKIE: ${{ secrets.v2Free_COOKIE_2 }}
+          USER: ${{ secrets.USER }}
+          PASS: ${{ secrets.PASS }}
+          TO: ${{ secrets.TO }}
+        run: npm i && node src/v2Free.js "${COOKIE}" "${USER}" "${PASS}" "${TO}"
