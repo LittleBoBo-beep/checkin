@@ -27,8 +27,6 @@ const v2freeData = {
 let [cookie, user, pass, to] = process.argv.slice(2);
 process.env.user = user;
 process.env.pass = pass;
-const str = '_ga_NC10VPE6SR=GS1.1.1663048941.1.1.1663048984.0.0.0; crisp-client%2Fsession%2Fa47ae3dd-53d8-4b15-afae-fb4577f7bcd0=session_6b96836a-a068-4ba9-93d2-2c43db0de49c; _gcl_au=1.1.1576638107.1663048972; _ga=GA1.1.2110849701.1663048941; email=qq845734834%40163.com; expire_in=1694584965; ip=ccb4faf93ec1001e9d3fe52b10a0ef76; key=110f66bd71720325e2b8a14f3938a12de0200bb250d42; uid=51057';
-cookie = str;
 const headers = {
 	"content-type": "application/json; charset=utf-8",
 	accept: "application/json, text/javascript, */*; q=0.01",
