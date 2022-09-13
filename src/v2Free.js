@@ -100,7 +100,12 @@ async function getMsgStatus({traffic = '', msg, trafficInfo: {lastUsedTraffic, t
 	let html = '<h1 style="text-align: center">自动签到通知</h1>';
 	const obj = compileCookie(cookie);
 	if (obj.email) {
-		obj.email = decodeURIComponent(obj.email);
+		try {
+			obj.email = decodeURIComponent(obj.email);
+		} catch (e) {
+			console.log('decodeURIComponent:', e)
+			throw e
+		}
 		html += `
 			<p  style="text-indent: 2em">签到账号$${obj.email}</p>
 		`
