@@ -119,6 +119,6 @@ async function getMsgStatus({traffic = '', msg, trafficInfo: {lastUsedTraffic, t
 	try {
 		await getMsgStatus(repData);
 	} catch (e) {
-		console.error(v2freeData.error)
+		console.error('getMsgStatus:', v2freeData.error)
 	}
 })()
