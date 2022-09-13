@@ -41,10 +41,14 @@ const headers = {
  */
 function compileCookie(cookie) {
 	const obj = {}
-	cookie.split(';').forEach(item => {
-		item = item.split('=');
-		obj[item[0].trim()] = item[1]
-	})
+	try {
+		cookie.split(';').forEach(item => {
+			item = item.split('=');
+			obj[item[0].trim()] = item[1]
+		})
+	} catch (e) {
+		console.log('compileCookie:', e)
+	}
 	return obj;
 }
 
