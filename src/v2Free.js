@@ -107,7 +107,7 @@ async function getMsgStatus({traffic = '', msg, trafficInfo: {lastUsedTraffic, t
 			throw e
 		}
 		html += `
-			<p  style="text-indent: 2em">签到账号$${obj.email}</p>
+			<p  style="text-indent: 2em">签到账号${obj.email}</p>
 		`
 	}
 	html += `
