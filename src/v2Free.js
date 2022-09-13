@@ -38,17 +38,26 @@ const headers = {
  * @returns {Promise<object>}
  */
 async function checkIn() {
+	let check_in;
 	try {
-		const check_in = await requestFetch("https://w1.v2dns.xyz/user/checkin", {
+		check_in = await requestFetch("https://go.tofly.cyou/user/checkin", {
 			headers,
 			method: "POST"
 		})
 		/*eg: {"msg":"\u83b7\u5f97\u4e86 495MB \u6d41\u91cf.","unflowtraffic":3537895424,"traffic":"3.29GB","trafficInfo":{"todayUsedTraffic":"0B","lastUsedTraffic":"142.77MB","unUsedTraffic":"3.16GB"},"ret":1}*/
-		Object.assign(v2freeData, check_in)
-		return v2freeData
 	} catch (e) {
-		console.error('e:', e)
+		console.error('e1:', e)
+		try {
+			check_in = await requestFetch("https://w1.v2dns.xyz/user/checkin", {
+				headers,
+				method: "POST"
+			})
+		} catch (e) {
+			console.log("e2:", e)
+		}
 	}
+	Object.assign(v2freeData, check_in)
+	return v2freeData
 }
 
 /**
