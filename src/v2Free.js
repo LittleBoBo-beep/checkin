@@ -13,14 +13,14 @@ const v2freeData = {
 		unUsedTraffic: ''
 	},
 	unflowtraffic: '', // nflowtraffic: 3537895424
-	set ret (value) {
+	set ret(value) {
 		if (value === 1) {
 			this.status = '成功'
 		} else {
 			this.status = '失败'
 		}
 	},
-	get ret () {
+	get ret() {
 		return this.status
 	}
 }
@@ -32,6 +32,21 @@ const headers = {
 	accept: "application/json, text/javascript, */*; q=0.01",
 	Cookie: cookie,
 };
+
+
+/**
+ *
+ * @param {string} cookie
+ * @return {{}}
+ */
+function compileCookie(cookie) {
+	const obj = {}
+	cookie.split(';').forEach(item => {
+		item = item.split('=');
+		obj[item[0].trim()] = item[1]
+	})
+	return obj;
+}
 
 /**
  * 签到
@@ -69,24 +84,33 @@ async function checkIn() {
  * @param unUsedTraffic {string}
  * @returns {Promise<void>}
  */
-async function getMsgStatus({traffic = '', msg, trafficInfo: { lastUsedTraffic, todayUsedTraffic, unUsedTraffic }}) {
+async function getMsgStatus({traffic = '', msg, trafficInfo: {lastUsedTraffic, todayUsedTraffic, unUsedTraffic}}) {
 	const params = {
 		from: v2freeData.title,
 		to,
 		subject: v2freeData.h1 + (v2freeData.status),
-		html: `
-        <h1 style="text-align: center">自动签到通知</h1>
-        <p style="text-indent: 2em">签到结果：${msg}</p>
+		html: null
+	}
+	let html = '<h1 style="text-align: center">自动签到通知</h1>';
+	const obj = compileCookie(cookie);
+	if (obj.email) {
+		obj.email = window.encodeURIComponent(obj.email);
+		params.html += `
+			<p  style="text-indent: 2em">签到账号$${obj.email}</p>
 		`
 	}
+	html += `
+        <p style="text-indent: 2em">签到结果：${msg}</p>
+	`
 	if (traffic) {
-		params.html += `
+		html += `
 			<p  style="text-indent: 2em">全部获得${traffic}</p>
 			<p  style="text-indent: 2em">已使用${lastUsedTraffic}</p>
 			<p  style="text-indent: 2em">今日使用${todayUsedTraffic}</p>
 			<p  style="text-indent: 2em">签到之前剩余${unUsedTraffic}</p>
 		`
 	}
+	params.html = html;
 	return sendMail(params)
 }
 
