@@ -21,9 +21,11 @@
 
 
 之后进入Actions中，找到对应的名称的脚本文件
+
 ![img.png](image/img.png)
 
 ![img_1.png](image/img_1.png)
+
 点击按钮
 Run workflow
 
