@@ -249,11 +249,11 @@ function run() {
 		await drawFn();
 		// BUGFIX
 		// const { notCollectBugList,bugfixInfo, gameInfo } =
-		try {
-			await bugFix();
-		} catch (e) {
-			console.log(e)
-		}
+		// try {
+			// await bugFix();
+		// } catch (e) {
+		// 	console.log(e)
+		// }
 		// console.log(bugfixInfo, gameInfo)
 		let html = '<h1 style="text-align: center">掘金自动化通知</h1>'
 		for (const noticeMsgKey in noticeMsg) {
