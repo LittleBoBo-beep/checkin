@@ -63,7 +63,7 @@ const drawFn = async () => {
 	  return Promise.resolve();
   }
   // if (draw.data.lottery_type === 1) score += 66;
-  await lucky();
+  // await lucky();
   noticeMsg.getLucky = '沾喜气成功~';
   noticeMsg.prize = `恭喜抽到：${draw.data.lottery_name}`
   return Promise.resolve();
