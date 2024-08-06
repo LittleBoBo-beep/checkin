@@ -11,8 +11,10 @@
     "dev:v2Free": "nodemon src/v2Free.js"
   },
   "dependencies": {
+    "form-data": "^4.0.0",
+    "formidable": "^3.5.1",
     "juejin-helper": "^1.6.1",
     "node-fetch": "^2.6.1",
-    "nodemailer": "^6.6.3"
+    "nodemailer": "6.9.9"
   }
 }
