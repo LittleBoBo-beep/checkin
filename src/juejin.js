@@ -34,7 +34,7 @@ async function run() {
 
 	// 获取统计签到天数
 	const res2 = await growth.getCounts();
-	html += addHtmlText('统计签到天数：', res.cont_count)
+	html += addHtmlText('统计签到天数：', res2.cont_count)
 
 	// 获取抽奖配置
 	// const res4 = await growth.getLotteryConfig();
