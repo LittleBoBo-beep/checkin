@@ -20,32 +20,32 @@ async function run() {
 	// 获取今日签到状态
 	const res3 = await growth.getTodayStatus();
 	if (res3) {
-		html += addHtmlText('是否签到：', '已经签到')
+		html += addHtmlText('是否签到', '已经签到')
 	} else {
 		// 签到
 		const res = await growth.checkIn();
-		html += addHtmlText('签到：', res)
+		html += addHtmlText('签到', res)
 	}
 
 
 	// 获取当前矿石数
 	const res1 = await growth.getCurrentPoint();
-	html += addHtmlText('当前矿石数：', res1)
+	html += addHtmlText('当前矿石数', res1)
 
 	// 获取统计签到天数
 	const res2 = await growth.getCounts();
-	html += addHtmlText('统计签到天数：', res2.cont_count)
+	html += addHtmlText('统计签到天数', res2.cont_count)
 
 	// 获取抽奖配置
 	// const res4 = await growth.getLotteryConfig();
 
 	// 抽奖
 	const res5 = await growth.drawLottery();
-	html += addHtmlText('抽奖：', res5.lottery_name)
+	html += addHtmlText('抽奖', res5.lottery_name)
 
 	// 获取我的幸运值
 	const res6 = await growth.getMyLucky();
-	html += addHtmlText('幸运值：', res6.total_value)
+	html += addHtmlText('幸运值', res6.total_value)
 
 	await juejin.logout();
 	return sendMail({
