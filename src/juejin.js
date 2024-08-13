@@ -24,7 +24,7 @@ async function run() {
 	} else {
 		// 签到
 		const res = await growth.checkIn();
-		html += addHtmlText('签到', res)
+		html += addHtmlText('签到:', `签到成功！获得${res.incr_point}矿石，现有${res.sum_point}矿石`)
 	}
 
 
