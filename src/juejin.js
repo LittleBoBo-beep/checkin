@@ -19,12 +19,22 @@ async function run() {
 
 	// 获取今日签到状态
 	const res3 = await growth.getTodayStatus();
+
+	async function checkIn() {
+		try {
+			const res = await growth.checkIn();
+			html += addHtmlText('签到:', `签到成功！获得${res.incr_point}矿石，现有${res.sum_point}矿石`)
+		} catch (e) {
+			console.log('e:', e.message)
+				await checkIn()
+		}
+	}
+
 	if (res3) {
 		html += addHtmlText('是否签到', '已经签到')
 	} else {
 		// 签到
-		const res = await growth.checkIn();
-		html += addHtmlText('签到:', `签到成功！获得${res.incr_point}矿石，现有${res.sum_point}矿石`)
+		await checkIn()
 	}
 
 
