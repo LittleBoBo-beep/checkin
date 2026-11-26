@@ -6,18 +6,26 @@
 
 打开浏览器，登陆对应网站，F12 查看 Network 面板，复制 cookie
 
-打开 github 仓库的 Setting，选择 Secrets，新建下列 4 个仓库 Secret
+打开 github 仓库的 Setting，选择 Secrets，按下面的名字新建仓库 Secret（区分大小写，需与 workflow 中一致）
 
-| key         | value                  |
+| key | value |
 |-------------|------------------------|
-| 网站名称_COOKIE | 值为复制的 cookie           |
-| USER        | 发送邮件的邮箱地址，该邮箱需要开启 SMTP |
-| PASS        | 该邮箱的 SMTP 密码           |
-| TO          | 接收邮件的邮箱                |
+| juejin_COOKIE | 掘金账号 1 的 cookie |
+| juejin_COOKIE2 | 掘金账号 2 的 cookie |
+| v2Free_COOKIE | v2free 账号 1 的 cookie |
+| v2Free_COOKIE_2 | v2free 账号 2 的 cookie |
+| USER | 发送邮件的邮箱地址，该邮箱需要开启 SMTP |
+| PASS | 该邮箱的 SMTP 密码 |
+| TO | 接收邮件的邮箱 |
 
-> 注：网站名称_COOKIE
-> 
-> 例子：掘金的为JUEJIN_COOKIE
+脚本从环境变量读取这些值。本地调试也可以走命令行：
+
+```bash
+node src/juejin.js "<cookie>" "<USER>" "<PASS>" "<TO>"
+node src/v2Free.js "<cookie>" "<USER>" "<PASS>" "<TO>"
+```
+
+定时为每天北京时间 05:30（UTC 21:30）。
 
 
 之后进入Actions中，找到对应的名称的脚本文件
